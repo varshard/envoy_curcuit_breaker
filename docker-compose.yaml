@@ -1,0 +1,52 @@
+version: "3.7"
+services:
+
+  envoy:
+    build:
+      context: envoy/
+    networks:
+      - envoymesh
+    expose:
+      - "9901"
+      - "10000"
+      - "10001"
+    ports:
+      - "9901:9901"
+      - "10000:10000"
+      - "10001:10001"
+
+  pingpong:
+    build:
+      context: .
+    networks:
+      envoymesh:
+        aliases:
+          - pingpong
+    expose:
+      - "6060"
+    ports:
+      - "6060:6060"
+  pingpong2:
+    build:
+      context: .
+    networks:
+      envoymesh:
+        aliases:
+          - pingpong2
+    expose:
+      - "6060"
+    ports:
+      - "6062:6060"
+
+  client:
+    build:
+      context: client/
+    networks:
+      - envoymesh
+    expose:
+      - "6061"
+    ports:
+      - "6061:6061"
+
+networks:
+  envoymesh: {}
