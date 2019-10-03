@@ -83,7 +83,6 @@ static_resources:
       outlier_detection:
         consecutive_5xx: 2
         max_ejection_percent: 100
-        interval: 30s
         base_ejection_time: 60s
     - name: service_google
       connect_timeout: 0.25s
