@@ -8,6 +8,7 @@ admin:
 
 static_resources:
   listeners:
+  # Proxy for Pingpong
     - name: listener_0
       address:
         socket_address:
@@ -25,6 +26,12 @@ static_resources:
                   virtual_hosts:
                     - name: local_service
                       domains: ["*"]
+                      retry_policy:
+                        retry_on: 5xx
+                        num_retries: 3
+                        per_try_timeout: 5s
+                        retry_back_off:
+                          base_interval: 0.1s
                       routes:
                         - match:
                             prefix: "/"
@@ -32,6 +39,7 @@ static_resources:
                             cluster: pingpong
                 http_filters:
                   - name: envoy.router
+    # Proxy for www.google.com
     - name: listener_1
       address:
         socket_address:
@@ -65,26 +73,32 @@ static_resources:
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN
       common_lb_config:
+        # Set panic threshold to 0 to prevent panic mode from
+        # adding back ejected host when there are no host in the cluster
         healthy_panic_threshold:
           value: 0
       hosts:
         - socket_address:
             address: pingpong
             port_value: 6060
-        - socket_address:
-            address: pingpong2
-            port_value: 6060
+#        - socket_address:
+#            address: pingpong2
+#            port_value: 6060
+        # Respond with 503 if connection parameters exceed the threshold
       circuit_breakers:
         thresholds:
           max_connections: 1
           max_pending_requests: 1
           max_retries: 3
           track_remaining: true
+        # Eject a host out of the cluster if there are too many consecutive 5xx
       outlier_detection:
-        consecutive_5xx: 2
+        consecutive_5xx: 10
+        # Eject until the cluster is empty
         max_ejection_percent: 100
         interval: 30s
         base_ejection_time: 60s
+    # Google cluster
     - name: service_google
       connect_timeout: 0.25s
       type: LOGICAL_DNS
