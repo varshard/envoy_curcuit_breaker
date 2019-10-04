@@ -31,7 +31,7 @@ static_resources:
                         num_retries: 3
                         per_try_timeout: 5s
                         retry_back_off:
-                          base_interval: 0.1s
+                          base_interval: 0.3s
                       routes:
                         - match:
                             prefix: "/"
@@ -81,10 +81,10 @@ static_resources:
         - socket_address:
             address: pingpong
             port_value: 6060
-#        - socket_address:
-#            address: pingpong2
-#            port_value: 6060
-        # Respond with 503 if connection parameters exceed the threshold
+        - socket_address:
+            address: pingpong2
+            port_value: 6060
+      # Respond with 503 if connection parameters exceed the threshold
       circuit_breakers:
         thresholds:
           max_connections: 1
