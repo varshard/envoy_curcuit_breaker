@@ -26,6 +26,7 @@ services:
       - "6060"
     ports:
       - "6060:6060"
+
   pingpong2:
     build:
       context: .

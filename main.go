@@ -3,21 +3,30 @@ package main
 import (
 	"bytes"
 	"fmt"
+
 	//"math/rand"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		//rand.Seed(time.Now().UnixNano())
-		//sleep := rand.Int31n(10)
-		//time.Sleep(time.Duration(sleep) * time.Second)
+	tryCount := 0
 
+	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "pong")
 	})
 
 	http.HandleFunc("/failed", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed", 500)
+	})
+
+	http.HandleFunc("/retry", func(w http.ResponseWriter, request *http.Request) {
+		tryCount++
+		if tryCount%3 != 0 {
+			http.Error(w, fmt.Sprintf("retry this %d", tryCount), 500)
+			return
+		}
+
+		fmt.Fprintf(w, "Finally %d", tryCount)
 	})
 
 	http.HandleFunc("/google", func(w http.ResponseWriter, r *http.Request) {
